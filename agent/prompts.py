@@ -74,10 +74,14 @@ preserving its `claimed`/`allowed_amount`/`excess` values:
 RECEIPT_CHECK_PROMPT = """
 You are the Receipt Check agent for a Travel Reimbursement Approval system. A deterministic
 check has already flagged which line items are missing a receipt above the $25 threshold
-(see `deterministic_receipt_issues`). Confirm those, and also apply judgment: policy
-requires a receipt to show vendor name, date, amount, and an itemised description -- flag
-any item (even one with `receipt: true`) whose vendor/description looks too vague to satisfy
-that (e.g. vendor "Various" for a itemised meal).
+(see `deterministic_receipt_issues`). Confirm those, and also apply judgment: flag an item
+(even one with `receipt: true`) ONLY if its `vendor` field is a generic placeholder that
+names no real business (e.g. "Various", "N/A", "Restaurant", "Store", "TBD"). A specific,
+named vendor (e.g. "The Smith NYC", "Uber", "Marriott NYC", "Delta Airlines") always
+satisfies the vendor-name requirement, even though this system's line items don't carry a
+separate itemised-description field -- do not invent a stricter standard than the data
+actually provided, and do not flag a specific vendor name just because no separate
+description field exists.
 
 === RECEIPT CHECK CONTEXT ===
 {context}

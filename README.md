@@ -244,7 +244,7 @@ travel-reimbursement-agent/
 
 | File | Total | Expected | Trigger |
 |---|---|---|---|
-| `claim_001.json` | $709 | Approve | All within limits, all receipts present |
+| `claim_001.json` | $709 | Approve | All within limits, all receipts present with specific, compliant vendor details |
 | `claim_002.json` | $890 | Partially Approve | Meals $95 > $75/day limit; taxi missing receipt |
 | `claim_003.json` | $1,200 | Reject | Alcohol line item (non-reimbursable) |
 | `claim_004.json` | $540 | Manual Review | Duplicate: hotel line item matches a prior claim this month |
