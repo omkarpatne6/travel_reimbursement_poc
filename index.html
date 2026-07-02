@@ -645,7 +645,7 @@
 
   async function checkHealth() {
     try {
-      const res = await fetch("http://localhost:8000/api/v1/health");
+      const res = await fetch("https://travel-reimbursement-poc.vercel.app/api/v1/health");
       if (!res.ok) throw new Error("bad status");
       const data = await res.json();
       els.serverDot.className = "dot ok";
@@ -861,7 +861,7 @@
     els.submitBtn.innerHTML = '<span class="spinner"></span> Evaluating&hellip;';
 
     try {
-      const res = await fetch("http://localhost:8000/api/v1/evaluate", {
+      const res = await fetch("https://travel-reimbursement-poc.vercel.app/api/v1/evaluate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(claim),
@@ -873,8 +873,8 @@
       }
       renderResults(data);
     } catch (e) {
-      showError("Could not reach the API at " + "http://localhost:8000/api/v1/evaluate" + ".\n" + e.message +
-        "\n\nIf you opened this file directly (file://), set the API base URL under Advanced options to your running server, e.g. http://localhost:8000.");
+      showError("Could not reach the API at " + "https://travel-reimbursement-poc.vercel.app/api/v1/evaluate" + ".\n" + e.message +
+        "\n\nIf you opened this file directly (file://), set the API base URL under Advanced options to your running server, e.g. https://travel-reimbursement-poc.vercel.app.");
     } finally {
       els.submitBtn.disabled = false;
       els.submitBtn.textContent = "Evaluate Claim";
