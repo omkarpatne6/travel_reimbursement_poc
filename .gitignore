@@ -1,0 +1,13 @@
+/tests
+/outputs
+.env
+
+env
+/env
+/.env
+
+/venv
+venv
+/vscode
+
+run_demo.py

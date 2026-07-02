@@ -1,0 +1,22 @@
+{
+  "claim_id": "CLM-2024-003",
+  "employee_id": "EMP-1123",
+  "employee_role": "Director",
+  "submission_date": "2024-11-08",
+  "trip": {
+    "destination": "London, UK",
+    "trip_type": "international",
+    "start_date": "2024-11-03",
+    "end_date": "2024-11-04",
+    "purpose": "Partner conference",
+    "days": 1
+  },
+  "line_items": [
+    { "category": "flight",  "amount": 900.00, "receipt": true, "vendor": "British Airways (First Class - no VP approval on file)", "date": "2024-11-03" },
+    { "category": "hotel",   "amount": 200.00, "receipt": true, "vendor": "The Savoy",   "date": "2024-11-03" },
+    { "category": "alcohol", "amount": 60.00,  "receipt": true, "vendor": "Hotel Bar",   "date": "2024-11-03" },
+    { "category": "taxi",    "amount": 40.00,  "receipt": true, "vendor": "Black Cab",   "date": "2024-11-03" }
+  ],
+  "total_claimed": 1200.00,
+  "prior_claims_this_month": []
+}

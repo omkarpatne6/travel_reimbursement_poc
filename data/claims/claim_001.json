@@ -1,0 +1,22 @@
+{
+  "claim_id": "CLM-2024-001",
+  "employee_id": "EMP-1042",
+  "employee_role": "Senior Engineer",
+  "submission_date": "2024-11-05",
+  "trip": {
+    "destination": "New York, NY",
+    "trip_type": "domestic",
+    "start_date": "2024-10-28",
+    "end_date": "2024-10-31",
+    "purpose": "Client onsite engagement",
+    "days": 3
+  },
+  "line_items": [
+    { "category": "flight", "amount": 420.00, "receipt": true, "vendor": "Delta Airlines", "date": "2024-10-28" },
+    { "category": "hotel",  "amount": 189.00, "receipt": true, "vendor": "Marriott NYC",   "date": "2024-10-28" },
+    { "category": "meals",  "amount": 65.00,  "receipt": true, "vendor": "The Smith NYC",  "date": "2024-10-29" },
+    { "category": "taxi",   "amount": 35.00,  "receipt": true, "vendor": "Uber",           "date": "2024-10-28" }
+  ],
+  "total_claimed": 709.00,
+  "prior_claims_this_month": []
+}

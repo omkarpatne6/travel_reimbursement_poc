@@ -1,0 +1,9 @@
+{
+  "description": "Mock receipt attachment metadata, keyed by claim_id + line item index. In this prototype, receipt presence is tracked inline on each line item ('receipt': true|false); this file simulates what an OCR/attachment pipeline would additionally capture.",
+  "receipts": [
+    { "claim_id": "CLM-2024-001", "category": "flight", "file": "receipt_001_flight.pdf", "ocr_confidence": 0.98 },
+    { "claim_id": "CLM-2024-001", "category": "hotel",  "file": "receipt_001_hotel.pdf",  "ocr_confidence": 0.95 },
+    { "claim_id": "CLM-2024-002", "category": "flight", "file": "receipt_002_flight.pdf", "ocr_confidence": 0.97 },
+    { "claim_id": "CLM-2024-002", "category": "meals",  "file": "receipt_002_meals.pdf",  "ocr_confidence": 0.90 }
+  ]
+}

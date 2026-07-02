@@ -1,0 +1,8 @@
+{
+  "thresholds": [
+    { "max_amount": 999,   "approver": "Line Manager",  "auto_eligible": true  },
+    { "max_amount": 4999,  "approver": "VP / Director", "auto_eligible": false },
+    { "max_amount": 99999, "approver": "CFO",            "auto_eligible": false }
+  ],
+  "non_reimbursable_categories": ["alcohol", "personal_entertainment", "clothing", "fines"]
+}

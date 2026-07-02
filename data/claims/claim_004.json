@@ -1,0 +1,23 @@
+{
+  "claim_id": "CLM-2024-004",
+  "employee_id": "EMP-1156",
+  "employee_role": "Sales Executive",
+  "submission_date": "2024-11-10",
+  "trip": {
+    "destination": "Austin, TX",
+    "trip_type": "domestic",
+    "start_date": "2024-11-08",
+    "end_date": "2024-11-10",
+    "purpose": "Regional sales meeting",
+    "days": 2
+  },
+  "line_items": [
+    { "category": "hotel", "amount": 300.00, "receipt": true, "vendor": "Omni Austin", "date": "2024-11-10" },
+    { "category": "meals", "amount": 140.00, "receipt": true, "vendor": "Various",     "date": "2024-11-10" },
+    { "category": "taxi",  "amount": 100.00, "receipt": true, "vendor": "Uber",        "date": "2024-11-10" }
+  ],
+  "total_claimed": 540.00,
+  "prior_claims_this_month": [
+    { "category": "hotel", "amount": 300.00, "receipt": true, "vendor": "Omni Austin", "date": "2024-11-10" }
+  ]
+}

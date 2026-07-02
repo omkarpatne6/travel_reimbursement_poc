@@ -1,0 +1,23 @@
+{
+  "claim_id": "CLM-2024-002",
+  "employee_id": "EMP-1087",
+  "employee_role": "Product Manager",
+  "submission_date": "2024-11-06",
+  "trip": {
+    "destination": "Chicago, IL",
+    "trip_type": "domestic",
+    "start_date": "2024-11-01",
+    "end_date": "2024-11-02",
+    "purpose": "Vendor negotiation",
+    "days": 1
+  },
+  "line_items": [
+    { "category": "flight",     "amount": 420.00, "receipt": true,  "vendor": "United Airlines",  "date": "2024-11-01" },
+    { "category": "hotel",      "amount": 189.00, "receipt": true,  "vendor": "Hilton Chicago",    "date": "2024-11-01" },
+    { "category": "meals",      "amount": 95.00,  "receipt": true,  "vendor": "Various",           "date": "2024-11-01" },
+    { "category": "taxi",       "amount": 30.00,  "receipt": false, "vendor": "Local Cab Co",      "date": "2024-11-01" },
+    { "category": "conference", "amount": 156.00, "receipt": true,  "vendor": "TechSummit 2024",   "date": "2024-11-01" }
+  ],
+  "total_claimed": 890.00,
+  "prior_claims_this_month": []
+}

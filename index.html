@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Travel Reimbursement Approval Agent</title>
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --panel: #ffffff;
+    --border: #e3e6eb;
+    --text: #1a1d24;
+    --text-muted: #6b7280;
+    --primary: #4338ca;
+    --primary-hover: #3730a3;
+    --primary-light: #eef2ff;
+    --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --radius: 10px;
+    --shadow: 0 1px 2px rgba(16,24,40,.05), 0 1px 3px rgba(16,24,40,.06);
+
+    --approve: #15803d; --approve-bg: #ecfdf3; --approve-border: #b7ecc8;
+    --partial: #b45309; --partial-bg: #fffaeb; --partial-border: #fbe8b3;
+    --reject: #b91c1c;  --reject-bg: #fef2f2;  --reject-border: #f6c6c6;
+    --manual: #6d28d9;  --manual-bg: #f5f3ff;  --manual-border: #ddd6fe;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  header {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  header h1 {
+    font-size: 18px;
+    margin: 0;
+    font-weight: 650;
+  }
+
+  header p {
+    margin: 2px 0 0;
+    color: var(--text-muted);
+    font-size: 12.5px;
+  }
+
+  #serverStatus {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #9ca3af;
+    flex-shrink: 0;
+  }
+  .dot.ok { background: #22c55e; }
+  .dot.bad { background: #ef4444; }
+
+  main {
+    max-width: 1280px;
+    margin: 24px auto;
+    padding: 0 20px 60px;
+    display: grid;
+    grid-template-columns: minmax(340px, 420px) 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+  }
+
+  .card + .card { margin-top: 20px; }
+
+  .card h2 {
+    font-size: 14px;
+    margin: 0 0 14px;
+    font-weight: 650;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+  }
+
+  select, input[type=text], textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-family: var(--sans);
+    font-size: 13.5px;
+    background: #fff;
+    color: var(--text);
+  }
+
+  select:focus, input[type=text]:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+  }
+
+  .field { margin-bottom: 14px; }
+
+  textarea#jsonInput {
+    width: 100%;
+    min-height: 260px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    resize: vertical;
+    tab-size: 2;
+  }
+
+  .row {
+    display: flex;
+    gap: 10px;
+  }
+  .row > * { flex: 1; }
+
+  .file-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--border);
+    background: #fff;
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    cursor: pointer;
+    color: var(--text);
+  }
+  .file-btn:hover { background: #f9fafb; }
+  #fileInput { display: none; }
+  #fileName { font-size: 12px; color: var(--text-muted); }
+
+  .samples {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 10px 0 16px;
+  }
+  .chip {
+    border: 1px solid var(--border);
+    background: #fafafa;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    cursor: pointer;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .chip:hover { background: var(--primary-light); border-color: #c7d2fe; color: var(--primary); }
+
+  .btn {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+  }
+  .btn:hover { background: var(--primary-hover); }
+  .btn:disabled { opacity: .55; cursor: not-allowed; }
+  .btn.secondary {
+    background: #fff;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn.secondary:hover { background: #f9fafb; }
+
+  .btn-row { display: flex; gap: 10px; margin-top: 4px; }
+
+  details.advanced { margin-top: 14px; }
+  details.advanced summary {
+    cursor: pointer;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    font-weight: 600;
+    user-select: none;
+  }
+  details.advanced .field { margin-top: 12px; }
+
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #errorBanner {
+    display: none;
+    background: var(--reject-bg);
+    border: 1px solid var(--reject-border);
+    color: var(--reject);
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 20px;
+    white-space: pre-wrap;
+  }
+
+  #resultsPlaceholder {
+    color: var(--text-muted);
+    font-size: 13.5px;
+    text-align: center;
+    padding: 60px 20px;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    background: var(--panel);
+  }
+
+  #results { display: none; }
+
+  .decision-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 14px;
+    border: 1px solid transparent;
+  }
+  .badge.Approve            { color: var(--approve); background: var(--approve-bg); border-color: var(--approve-border); }
+  .badge.PartiallyApprove   { color: var(--partial); background: var(--partial-bg); border-color: var(--partial-border); }
+  .badge.Reject             { color: var(--reject);  background: var(--reject-bg);  border-color: var(--reject-border); }
+  .badge.ManualReview       { color: var(--manual);  background: var(--manual-bg);  border-color: var(--manual-border); }
+
+  .claim-meta { font-size: 12.5px; color: var(--text-muted); }
+  .claim-meta strong { color: var(--text); }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .stat-tile {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    background: #fafbfc;
+  }
+  .stat-tile .stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--text-muted);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .stat-tile .stat-value {
+    font-size: 19px;
+    font-weight: 700;
+  }
+
+  .confidence-wrap { margin-bottom: 18px; }
+  .confidence-bar-bg {
+    width: 100%;
+    height: 8px;
+    border-radius: 999px;
+    background: #eef0f3;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+  .confidence-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #6366f1, #4338ca);
+  }
+
+  .section-title {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    margin: 22px 0 8px;
+  }
+  .section-title:first-of-type { margin-top: 0; }
+
+  p.explanation {
+    background: #fafbfc;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin: 0;
+    font-size: 13.5px;
+  }
+
+  .manual-review-box {
+    background: var(--manual-bg);
+    border: 1px solid var(--manual-border);
+    color: var(--manual);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  th, td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    color: var(--text-muted);
+    font-weight: 650;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  tr:last-child td { border-bottom: none; }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; }
+  .table-wrap table { border: none; }
+
+  ul.plain-list { margin: 0; padding-left: 18px; font-size: 13px; }
+  ul.plain-list li { margin-bottom: 4px; }
+
+  .chips-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ref-chip {
+    background: var(--primary-light);
+    color: var(--primary);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11.5px;
+  }
+
+  .empty-note { color: var(--text-muted); font-size: 12.5px; font-style: italic; }
+
+  .type-badge {
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .type-badge.llm { background: var(--manual-bg); color: var(--manual); }
+  .type-badge.deterministic { background: #f1f5f9; color: #475569; }
+
+  .tool-tag {
+    display: inline-block;
+    background: #f1f5f9;
+    color: #334155;
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 5px;
+    margin: 1px 3px 1px 0;
+  }
+
+  #auditTrail {
+    background: #0f1117;
+    color: #d1d5db;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    max-height: 220px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    line-height: 1.6;
+  }
+
+  .footer-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .token-total {
+    font-family: var(--mono);
+    font-weight: 700;
+  }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+  .tab-btn {
+    border: 1px solid var(--border);
+    background: #fafafa;
+    padding: 6px 12px;
+    border-radius: 7px;
+    font-size: 12.5px;
+    cursor: pointer;
+    color: var(--text-muted);
+  }
+  .tab-btn.active { background: var(--primary-light); color: var(--primary); border-color: #c7d2fe; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Travel Reimbursement Approval Agent</h1>
+    <p>LangGraph orchestration &middot; FastAPI backend &middot; multi-provider LLM</p>
+  </div>
+  <div id="serverStatus"><span class="dot"></span><span id="serverStatusText">Checking backend&hellip;</span></div>
+</header>
+
+<main>
+  <!-- LEFT: INPUT -->
+  <div>
+    <div class="card">
+      <h2>Submit a Claim</h2>
+
+      <div class="field">
+        <label for="providerSelect">Model Provider</label>
+        <select id="providerSelect"></select>
+      </div>
+
+      <label>Claim JSON</label>
+      <div class="samples" id="sampleButtons"></div>
+      <textarea id="jsonInput" spellcheck="false" placeholder='Paste a claim JSON here, e.g. { "claim_id": "CLM-2024-001", ... }'></textarea>
+
+      <div class="row" style="margin-top:10px;">
+        <label class="file-btn" for="fileInput">
+          &#128193; Upload JSON file
+          <input type="file" id="fileInput" accept="application/json,.json">
+        </label>
+        <span id="fileName"></span>
+      </div>
+
+      <details class="advanced">
+        <summary>Advanced options</summary>
+        <div class="field">
+          <label for="modelNameInput">Model name override (optional)</label>
+          <input type="text" id="modelNameInput" placeholder="e.g. gpt-4o-mini, claude-3-5-haiku-20241022">
+        </div>
+        <div class="field">
+          <label for="baseUrlInput">API base URL</label>
+          <input type="text" id="baseUrlInput">
+        </div>
+      </details>
+
+      <div class="btn-row" style="margin-top:16px;">
+        <button class="btn" id="submitBtn">Evaluate Claim</button>
+        <button class="btn secondary" id="clearBtn">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: RESULTS -->
+  <div>
+    <div id="errorBanner"></div>
+
+    <div id="resultsPlaceholder">
+      Submit a claim to see the decision, deductions, audit trail, and full observability trace here.
+    </div>
+
+    <div id="results">
+      <div class="card">
+        <div class="decision-header">
+          <div>
+            <span id="decisionBadge" class="badge">&mdash;</span>
+          </div>
+          <div class="claim-meta">
+            Claim <strong id="metaClaimId">&mdash;</strong> &middot;
+            Provider <strong id="metaProvider">&mdash;</strong>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-tile"><div class="stat-label">Total Claimed</div><div class="stat-value" id="statTotal">$0.00</div></div>
+          <div class="stat-tile"><div class="stat-label">Approved</div><div class="stat-value" id="statApproved">$0.00</div></div>
+          <div class="stat-tile"><div class="stat-label">Rejected</div><div class="stat-value" id="statRejected">$0.00</div></div>
+          <div class="stat-tile"><div class="stat-label">Required Approver</div><div class="stat-value" id="statApprover" style="font-size:14px;">&mdash;</div></div>
+        </div>
+
+        <div class="confidence-wrap">
+          <div style="display:flex; justify-content:space-between;">
+            <label style="margin:0;">Confidence</label>
+            <span id="confidenceValue" style="font-size:12.5px; font-weight:700;">&mdash;</span>
+          </div>
+          <div class="confidence-bar-bg"><div class="confidence-bar-fill" id="confidenceBar" style="width:0%;"></div></div>
+        </div>
+
+        <div class="section-title">Explanation</div>
+        <p class="explanation" id="explanationText">&mdash;</p>
+
+        <div id="manualReviewSection" style="display:none;">
+          <div class="section-title">Manual Review Reason</div>
+          <div class="manual-review-box" id="manualReviewText"></div>
+        </div>
+
+        <div class="section-title">Deductions</div>
+        <div id="deductionsWrap"></div>
+
+        <div class="section-title">Missing Documents</div>
+        <div id="missingDocsWrap"></div>
+
+        <div class="section-title">Policy References</div>
+        <div id="policyRefsWrap" class="chips-list"></div>
+
+        <div class="section-title">Audit Trail</div>
+        <div id="auditTrail"></div>
+
+        <div class="footer-actions">
+          <button class="btn secondary" id="downloadBtn">Download decision JSON</button>
+          <button class="btn secondary" id="copyBtn">Copy raw response</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Observability</h2>
+
+        <div class="stat-grid" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="stat-tile"><div class="stat-label">Input Tokens</div><div class="stat-value token-total" id="tokIn">0</div></div>
+          <div class="stat-tile"><div class="stat-label">Output Tokens</div><div class="stat-value token-total" id="tokOut">0</div></div>
+          <div class="stat-tile"><div class="stat-label">Total Tokens</div><div class="stat-value token-total" id="tokTotal">0</div></div>
+        </div>
+
+        <div class="section-title">Per-Node Execution Trace</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Node</th>
+                <th>Type</th>
+                <th>Tool(s) Called</th>
+                <th>Provider / Model</th>
+                <th>Duration</th>
+                <th>Tokens (in / out / total)</th>
+              </tr>
+            </thead>
+            <tbody id="nodeTraceBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  const PROVIDERS = ["openai", "azure_openai", "gemini", "anthropic"];
+  const PROVIDER_LABELS = {
+    openai: "OpenAI",
+    azure_openai: "Azure OpenAI",
+    gemini: "Google Gemini",
+    anthropic: "Anthropic Claude",
+  };
+
+  const SAMPLES = {
+    "claim_001 (Approve)": {"claim_id":"CLM-2024-001","employee_id":"EMP-1042","employee_role":"Senior Engineer","submission_date":"2024-11-05","trip":{"destination":"New York, NY","trip_type":"domestic","start_date":"2024-10-28","end_date":"2024-10-31","purpose":"Client onsite engagement","days":3},"line_items":[{"category":"flight","amount":420.0,"receipt":true,"vendor":"Delta Airlines","date":"2024-10-28"},{"category":"hotel","amount":189.0,"receipt":true,"vendor":"Marriott NYC","date":"2024-10-28"},{"category":"meals","amount":65.0,"receipt":true,"vendor":"Various","date":"2024-10-29"},{"category":"taxi","amount":35.0,"receipt":true,"vendor":"Uber","date":"2024-10-28"}],"total_claimed":709.0,"prior_claims_this_month":[]},
+    "claim_002 (Partially Approve)": {"claim_id":"CLM-2024-002","employee_id":"EMP-1087","employee_role":"Product Manager","submission_date":"2024-11-06","trip":{"destination":"Chicago, IL","trip_type":"domestic","start_date":"2024-11-01","end_date":"2024-11-02","purpose":"Vendor negotiation","days":1},"line_items":[{"category":"flight","amount":420.0,"receipt":true,"vendor":"United Airlines","date":"2024-11-01"},{"category":"hotel","amount":189.0,"receipt":true,"vendor":"Hilton Chicago","date":"2024-11-01"},{"category":"meals","amount":95.0,"receipt":true,"vendor":"Various","date":"2024-11-01"},{"category":"taxi","amount":30.0,"receipt":false,"vendor":"Local Cab Co","date":"2024-11-01"},{"category":"conference","amount":156.0,"receipt":true,"vendor":"TechSummit 2024","date":"2024-11-01"}],"total_claimed":890.0,"prior_claims_this_month":[]},
+    "claim_003 (Reject)": {"claim_id":"CLM-2024-003","employee_id":"EMP-1123","employee_role":"Director","submission_date":"2024-11-08","trip":{"destination":"London, UK","trip_type":"international","start_date":"2024-11-03","end_date":"2024-11-04","purpose":"Partner conference","days":1},"line_items":[{"category":"flight","amount":900.0,"receipt":true,"vendor":"British Airways (First Class - no VP approval on file)","date":"2024-11-03"},{"category":"hotel","amount":200.0,"receipt":true,"vendor":"The Savoy","date":"2024-11-03"},{"category":"alcohol","amount":60.0,"receipt":true,"vendor":"Hotel Bar","date":"2024-11-03"},{"category":"taxi","amount":40.0,"receipt":true,"vendor":"Black Cab","date":"2024-11-03"}],"total_claimed":1200.0,"prior_claims_this_month":[]},
+    "claim_004 (Manual Review – duplicate)": {"claim_id":"CLM-2024-004","employee_id":"EMP-1156","employee_role":"Sales Executive","submission_date":"2024-11-10","trip":{"destination":"Austin, TX","trip_type":"domestic","start_date":"2024-11-08","end_date":"2024-11-10","purpose":"Regional sales meeting","days":2},"line_items":[{"category":"hotel","amount":300.0,"receipt":true,"vendor":"Omni Austin","date":"2024-11-10"},{"category":"meals","amount":140.0,"receipt":true,"vendor":"Various","date":"2024-11-10"},{"category":"taxi","amount":100.0,"receipt":true,"vendor":"Uber","date":"2024-11-10"}],"total_claimed":540.0,"prior_claims_this_month":[{"category":"hotel","amount":300.0,"receipt":true,"vendor":"Omni Austin","date":"2024-11-10"}]},
+    "claim_005 (Manual Review – VP sign-off)": {"claim_id":"CLM-2024-005","employee_id":"EMP-1201","employee_role":"VP of Engineering","submission_date":"2024-11-12","trip":{"destination":"San Francisco, CA","trip_type":"domestic","start_date":"2024-11-04","end_date":"2024-11-08","purpose":"Industry conference","days":4},"line_items":[{"category":"flight","amount":1200.0,"receipt":true,"vendor":"Alaska Airlines","date":"2024-11-04"},{"category":"hotel","amount":800.0,"receipt":true,"vendor":"Hyatt SF","date":"2024-11-04"},{"category":"meals","amount":300.0,"receipt":true,"vendor":"Various","date":"2024-11-05"},{"category":"conference","amount":1500.0,"receipt":true,"vendor":"AI Summit 2024","date":"2024-11-04"}],"total_claimed":3800.0,"prior_claims_this_month":[]}
+  };
+
+  const els = {
+    providerSelect: document.getElementById("providerSelect"),
+    jsonInput: document.getElementById("jsonInput"),
+    fileInput: document.getElementById("fileInput"),
+    fileName: document.getElementById("fileName"),
+    modelNameInput: document.getElementById("modelNameInput"),
+    baseUrlInput: document.getElementById("baseUrlInput"),
+    submitBtn: document.getElementById("submitBtn"),
+    clearBtn: document.getElementById("clearBtn"),
+    sampleButtons: document.getElementById("sampleButtons"),
+    errorBanner: document.getElementById("errorBanner"),
+    resultsPlaceholder: document.getElementById("resultsPlaceholder"),
+    results: document.getElementById("results"),
+    serverStatusText: document.getElementById("serverStatusText"),
+    serverDot: document.querySelector("#serverStatus .dot"),
+    downloadBtn: document.getElementById("downloadBtn"),
+    copyBtn: document.getElementById("copyBtn"),
+  };
+
+  let lastResponse = null;
+
+
+  // ---- Provider dropdown + health check -------------------------------
+  function populateProviders(available) {
+    els.providerSelect.innerHTML = "";
+    PROVIDERS.forEach((p) => {
+      const opt = document.createElement("option");
+      opt.value = p;
+      const configured = !available || available.includes(p);
+      opt.textContent = PROVIDER_LABELS[p] + (configured ? "" : " (not configured)");
+      els.providerSelect.appendChild(opt);
+    });
+    if (available && available.length) {
+      els.providerSelect.value = available[0];
+    }
+  }
+  populateProviders(null);
+
+  async function checkHealth() {
+    try {
+      const res = await fetch("http://localhost:8000/api/v1/health");
+      if (!res.ok) throw new Error("bad status");
+      const data = await res.json();
+      els.serverDot.className = "dot ok";
+      const available = data.available_providers || [];
+      els.serverStatusText.textContent = available.length
+        ? "Connected — " + available.map((p) => PROVIDER_LABELS[p] || p).join(", ")
+        : "Connected — no LLM providers configured";
+      populateProviders(available);
+    } catch (e) {
+      els.serverDot.className = "dot bad";
+      els.serverStatusText.textContent = "Backend unreachable at " + apiUrl("");
+    }
+  }
+  checkHealth();
+  els.baseUrlInput.addEventListener("change", checkHealth);
+
+  // ---- Sample buttons --------------------------------------------------
+  Object.keys(SAMPLES).forEach((label) => {
+    const chip = document.createElement("span");
+    chip.className = "chip";
+    chip.textContent = label;
+    chip.onclick = () => {
+      els.jsonInput.value = JSON.stringify(SAMPLES[label], null, 2);
+      els.fileName.textContent = "";
+    };
+    els.sampleButtons.appendChild(chip);
+  });
+
+  // ---- File upload -------------------------------------------------------
+  els.fileInput.addEventListener("change", () => {
+    const file = els.fileInput.files[0];
+    if (!file) return;
+    els.fileName.textContent = file.name;
+    const reader = new FileReader();
+    reader.onload = () => { els.jsonInput.value = reader.result; };
+    reader.onerror = () => showError("Could not read file: " + file.name);
+    reader.readAsText(file);
+  });
+
+  els.clearBtn.addEventListener("click", () => {
+    els.jsonInput.value = "";
+    els.fileInput.value = "";
+    els.fileName.textContent = "";
+    els.modelNameInput.value = "";
+    hideError();
+  });
+
+  // ---- Error handling ------------------------------------------------
+  function showError(msg) {
+    els.errorBanner.textContent = msg;
+    els.errorBanner.style.display = "block";
+  }
+  function hideError() {
+    els.errorBanner.style.display = "none";
+  }
+
+  // ---- Formatting helpers ----------------------------------------------
+  const money = (n) => "$" + Number(n || 0).toFixed(2);
+  const badgeClass = (decision) => (decision || "").replace(/\s+/g, "");
+
+  function renderTable(rows, columns, emptyText) {
+    if (!rows || !rows.length) {
+      const div = document.createElement("div");
+      div.className = "empty-note";
+      div.textContent = emptyText;
+      return div;
+    }
+    const wrap = document.createElement("div");
+    wrap.className = "table-wrap";
+    const table = document.createElement("table");
+    const thead = document.createElement("thead");
+    thead.innerHTML = "<tr>" + columns.map((c) => `<th>${c.label}</th>`).join("") + "</tr>";
+    table.appendChild(thead);
+    const tbody = document.createElement("tbody");
+    rows.forEach((row) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = columns.map((c) => `<td>${c.render(row)}</td>`).join("");
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    wrap.appendChild(table);
+    return wrap;
+  }
+
+  function renderList(items, emptyText) {
+    if (!items || !items.length) {
+      const div = document.createElement("div");
+      div.className = "empty-note";
+      div.textContent = emptyText;
+      return div;
+    }
+    const ul = document.createElement("ul");
+    ul.className = "plain-list";
+    items.forEach((i) => {
+      const li = document.createElement("li");
+      li.textContent = i;
+      ul.appendChild(li);
+    });
+    return ul;
+  }
+
+  // ---- Render results ----------------------------------------------------
+  function renderResults(data) {
+    lastResponse = data;
+
+    document.getElementById("decisionBadge").className = "badge " + badgeClass(data.decision);
+    document.getElementById("decisionBadge").textContent = data.decision;
+    document.getElementById("metaClaimId").textContent = data.claim_id;
+    document.getElementById("metaProvider").textContent =
+      (data.model_provider_used || "") + (data.model_name_used ? " / " + data.model_name_used : "");
+
+    document.getElementById("statTotal").textContent = money(data.total_claimed);
+    document.getElementById("statApproved").textContent = money(data.approved_amount);
+    document.getElementById("statRejected").textContent = money(data.rejected_amount);
+    document.getElementById("statApprover").textContent = data.required_approver || "—";
+
+    const confPct = Math.round((data.confidence || 0) * 100);
+    document.getElementById("confidenceValue").textContent = confPct + "%";
+    document.getElementById("confidenceBar").style.width = confPct + "%";
+
+    document.getElementById("explanationText").textContent = data.explanation || "—";
+
+    const mrSection = document.getElementById("manualReviewSection");
+    if (data.manual_review_reason) {
+      mrSection.style.display = "block";
+      document.getElementById("manualReviewText").textContent = data.manual_review_reason;
+    } else {
+      mrSection.style.display = "none";
+    }
+
+    const deductionsWrap = document.getElementById("deductionsWrap");
+    deductionsWrap.innerHTML = "";
+    deductionsWrap.appendChild(renderTable(
+      data.deductions,
+      [
+        { label: "Category", render: (r) => r.category },
+        { label: "Claimed", render: (r) => money(r.claimed) },
+        { label: "Approved", render: (r) => money(r.approved) },
+        { label: "Reason", render: (r) => r.reason },
+      ],
+      "No deductions — all line items fully approved."
+    ));
+
+    const missingWrap = document.getElementById("missingDocsWrap");
+    missingWrap.innerHTML = "";
+    missingWrap.appendChild(renderList(data.missing_documents, "No missing documents."));
+
+    const refsWrap = document.getElementById("policyRefsWrap");
+    refsWrap.innerHTML = "";
+    if (data.policy_references && data.policy_references.length) {
+      data.policy_references.forEach((ref) => {
+        const span = document.createElement("span");
+        span.className = "ref-chip";
+        span.textContent = ref;
+        refsWrap.appendChild(span);
+      });
+    } else {
+      refsWrap.innerHTML = '<span class="empty-note">No policy references cited.</span>';
+    }
+
+    document.getElementById("auditTrail").textContent = (data.audit_trail || []).join("\n");
+
+    // Observability
+    const obs = data.observability || { node_trace: [], total_tokens: {} };
+    const tot = obs.total_tokens || {};
+    document.getElementById("tokIn").textContent = tot.input_tokens || 0;
+    document.getElementById("tokOut").textContent = tot.output_tokens || 0;
+    document.getElementById("tokTotal").textContent = tot.total_tokens || 0;
+
+    const tbody = document.getElementById("nodeTraceBody");
+    tbody.innerHTML = "";
+    (obs.node_trace || []).forEach((n) => {
+      const tr = document.createElement("tr");
+      const tools = (n.tools_called || []).map((t) => `<span class="tool-tag">${t}</span>`).join("") || "—";
+      const providerModel = n.type === "llm" ? `${n.provider || ""}<br><span style="color:var(--text-muted)">${n.model || ""}</span>` : "—";
+      const tokens = n.type === "llm"
+        ? `${n.token_usage.input_tokens} / ${n.token_usage.output_tokens} / <strong>${n.token_usage.total_tokens}</strong>`
+        : `<span class="empty-note">0 / 0 / 0</span>`;
+      tr.innerHTML = `
+        <td><strong>${n.node}</strong></td>
+        <td><span class="type-badge ${n.type}">${n.type}</span></td>
+        <td>${tools}</td>
+        <td>${providerModel}</td>
+        <td>${n.duration_ms.toFixed(2)} ms</td>
+        <td>${tokens}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    els.resultsPlaceholder.style.display = "none";
+    els.results.style.display = "block";
+  }
+
+  // ---- Submit --------------------------------------------------------
+  async function submitClaim() {
+    hideError();
+    let claim;
+    try {
+      claim = JSON.parse(els.jsonInput.value);
+    } catch (e) {
+      showError("Invalid JSON: " + e.message);
+      return;
+    }
+
+    claim.model_provider = els.providerSelect.value;
+    if (els.modelNameInput.value.trim()) {
+      claim.model_name = els.modelNameInput.value.trim();
+    } else {
+      delete claim.model_name;
+    }
+
+    els.submitBtn.disabled = true;
+    els.submitBtn.innerHTML = '<span class="spinner"></span> Evaluating&hellip;';
+
+    try {
+      const res = await fetch("http://localhost:8000/api/v1/evaluate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(claim),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        showError((data.detail ? JSON.stringify(data.detail) : res.statusText) || "Request failed.");
+        return;
+      }
+      renderResults(data);
+    } catch (e) {
+      showError("Could not reach the API at " + "http://localhost:8000/api/v1/evaluate" + ".\n" + e.message +
+        "\n\nIf you opened this file directly (file://), set the API base URL under Advanced options to your running server, e.g. http://localhost:8000.");
+    } finally {
+      els.submitBtn.disabled = false;
+      els.submitBtn.textContent = "Evaluate Claim";
+    }
+  }
+
+  els.submitBtn.addEventListener("click", submitClaim);
+
+  els.downloadBtn.addEventListener("click", () => {
+    if (!lastResponse) return;
+    const blob = new Blob([JSON.stringify(lastResponse, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${lastResponse.claim_id || "decision"}_decision.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  els.copyBtn.addEventListener("click", async () => {
+    if (!lastResponse) return;
+    await navigator.clipboard.writeText(JSON.stringify(lastResponse, null, 2));
+    els.copyBtn.textContent = "Copied!";
+    setTimeout(() => { els.copyBtn.textContent = "Copy raw response"; }, 1500);
+  });
+})();
+</script>
+</body>
+</html>

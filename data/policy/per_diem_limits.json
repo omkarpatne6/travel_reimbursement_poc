@@ -1,0 +1,20 @@
+{
+  "domestic": {
+    "meals": 75,
+    "hotel": 200,
+    "ground_transport": 50,
+    "taxi": 50,
+    "flight": null,
+    "parking": 40,
+    "conference": null
+  },
+  "international": {
+    "meals": 100,
+    "hotel": 300,
+    "ground_transport": 80,
+    "taxi": 80,
+    "flight": null,
+    "parking": 60,
+    "conference": null
+  }
+}
