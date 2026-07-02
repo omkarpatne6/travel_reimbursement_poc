@@ -598,7 +598,7 @@
   };
 
   const SAMPLES = {
-    "claim_001 (Approve)": {"claim_id":"CLM-2024-001","employee_id":"EMP-1042","employee_role":"Senior Engineer","submission_date":"2024-11-05","trip":{"destination":"New York, NY","trip_type":"domestic","start_date":"2024-10-28","end_date":"2024-10-31","purpose":"Client onsite engagement","days":3},"line_items":[{"category":"flight","amount":420.0,"receipt":true,"vendor":"Delta Airlines","date":"2024-10-28"},{"category":"hotel","amount":189.0,"receipt":true,"vendor":"Marriott NYC","date":"2024-10-28"},{"category":"meals","amount":65.0,"receipt":true,"vendor":"The Smith NYC","date":"2024-10-29"},{"category":"taxi","amount":35.0,"receipt":true,"vendor":"Uber","date":"2024-10-28"}],"total_claimed":709.0,"prior_claims_this_month":[]},
+    "claim_001 (Approve)": {"claim_id":"CLM-2024-001","employee_id":"EMP-1042","employee_role":"Senior Engineer","submission_date":"2024-11-05","trip":{"destination":"New York, NY","trip_type":"domestic","start_date":"2024-10-28","end_date":"2024-10-31","purpose":"Client onsite engagement","days":3},"line_items":[{"category":"flight","amount":420.0,"receipt":true,"vendor":"Delta Airlines","date":"2024-10-28"},{"category":"hotel","amount":189.0,"receipt":true,"vendor":"Marriott NYC","date":"2024-10-28"},{"category":"meals","amount":65.0,"receipt":true,"vendor":"Various","date":"2024-10-29"},{"category":"taxi","amount":35.0,"receipt":true,"vendor":"Uber","date":"2024-10-28"}],"total_claimed":709.0,"prior_claims_this_month":[]},
     "claim_002 (Partially Approve)": {"claim_id":"CLM-2024-002","employee_id":"EMP-1087","employee_role":"Product Manager","submission_date":"2024-11-06","trip":{"destination":"Chicago, IL","trip_type":"domestic","start_date":"2024-11-01","end_date":"2024-11-02","purpose":"Vendor negotiation","days":1},"line_items":[{"category":"flight","amount":420.0,"receipt":true,"vendor":"United Airlines","date":"2024-11-01"},{"category":"hotel","amount":189.0,"receipt":true,"vendor":"Hilton Chicago","date":"2024-11-01"},{"category":"meals","amount":95.0,"receipt":true,"vendor":"Various","date":"2024-11-01"},{"category":"taxi","amount":30.0,"receipt":false,"vendor":"Local Cab Co","date":"2024-11-01"},{"category":"conference","amount":156.0,"receipt":true,"vendor":"TechSummit 2024","date":"2024-11-01"}],"total_claimed":890.0,"prior_claims_this_month":[]},
     "claim_003 (Reject)": {"claim_id":"CLM-2024-003","employee_id":"EMP-1123","employee_role":"Director","submission_date":"2024-11-08","trip":{"destination":"London, UK","trip_type":"international","start_date":"2024-11-03","end_date":"2024-11-04","purpose":"Partner conference","days":1},"line_items":[{"category":"flight","amount":900.0,"receipt":true,"vendor":"British Airways (First Class - no VP approval on file)","date":"2024-11-03"},{"category":"hotel","amount":200.0,"receipt":true,"vendor":"The Savoy","date":"2024-11-03"},{"category":"alcohol","amount":60.0,"receipt":true,"vendor":"Hotel Bar","date":"2024-11-03"},{"category":"taxi","amount":40.0,"receipt":true,"vendor":"Black Cab","date":"2024-11-03"}],"total_claimed":1200.0,"prior_claims_this_month":[]},
     "claim_004 (Manual Review – duplicate)": {"claim_id":"CLM-2024-004","employee_id":"EMP-1156","employee_role":"Sales Executive","submission_date":"2024-11-10","trip":{"destination":"Austin, TX","trip_type":"domestic","start_date":"2024-11-08","end_date":"2024-11-10","purpose":"Regional sales meeting","days":2},"line_items":[{"category":"hotel","amount":300.0,"receipt":true,"vendor":"Omni Austin","date":"2024-11-10"},{"category":"meals","amount":140.0,"receipt":true,"vendor":"Various","date":"2024-11-10"},{"category":"taxi","amount":100.0,"receipt":true,"vendor":"Uber","date":"2024-11-10"}],"total_claimed":540.0,"prior_claims_this_month":[{"category":"hotel","amount":300.0,"receipt":true,"vendor":"Omni Austin","date":"2024-11-10"}]},
@@ -645,7 +645,7 @@
 
   async function checkHealth() {
     try {
-      const res = await fetch("http://localhost:8000/api/v1/health");
+      const res = await fetch("https://travel-reimbursement-poc.vercel.app/api/v1/health");
       if (!res.ok) throw new Error("bad status");
       const data = await res.json();
       els.serverDot.className = "dot ok";
@@ -861,7 +861,7 @@
     els.submitBtn.innerHTML = '<span class="spinner"></span> Evaluating&hellip;';
 
     try {
-      const res = await fetch("http://localhost:8000/api/v1/evaluate", {
+      const res = await fetch("https://travel-reimbursement-poc.vercel.app/api/v1/evaluate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(claim),
@@ -873,8 +873,8 @@
       }
       renderResults(data);
     } catch (e) {
-      showError("Could not reach the API at " + "http://localhost:8000/api/v1/evaluate" + ".\n" + e.message +
-        "\n\nIf you opened this file directly (file://), set the API base URL under Advanced options to your running server, e.g. http://localhost:8000.");
+      showError("Could not reach the API at " + "https://travel-reimbursement-poc.vercel.app/api/v1/evaluate" + ".\n" + e.message +
+        "\n\nIf you opened this file directly (file://), set the API base URL under Advanced options to your running server, e.g. https://travel-reimbursement-poc.vercel.app.");
     } finally {
       els.submitBtn.disabled = false;
       els.submitBtn.textContent = "Evaluate Claim";
